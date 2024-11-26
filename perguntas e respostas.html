@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Perguntas e Respostas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .quiz-container h1 {
+            font-size: 22px;
+            color: #333;
+        }
+        .question {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            background-color: #f9f9f9;
+            transition: background-color 0.2s;
+        }
+        .option:hover {
+            background-color: #ddd;
+        }
+        .result {
+            font-size: 20px;
+            margin-top: 20px;
+            color: #333;
+        }
+        .btn {
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Jogo de Perguntas e Respostas</h1>
+        <div class="question" id="question">Pergunta</div>
+        <div class="options">
+            <div class="option" onclick="checkAnswer(0)" id="option0">Opção 1</div>
+            <div class="option" onclick="checkAnswer(1)" id="option1">Opção 2</div>
+            <div class="option" onclick="checkAnswer(2)" id="option2">Opção 3</div>
+            <div class="option" onclick="checkAnswer(3)" id="option3">Opção 4</div>
+        </div>
+        <button class="btn" onclick="nextQuestion()">Próxima Pergunta</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Array com perguntas e respostas de História e Língua Portuguesa
+        const perguntas = [
+            // Perguntas de História
+            { pergunta: "Qual evento marcou o início da Idade Média?", opcoes: ["Queda de Roma", "Revolução Francesa", "Renascimento", "Segunda Guerra Mundial"], respostaCorreta: 0 },
+            { pergunta: "Quem descobriu o Brasil em 1500?", opcoes: ["Pedro Álvares Cabral", "Cristóvão Colombo", "Vasco da Gama", "Fernão de Magalhães"], respostaCorreta: 0 },
+            { pergunta: "A escravidão no Brasil foi abolida em que ano?", opcoes: ["1822", "1888", "1850", "1900"], respostaCorreta: 1 },
+            { pergunta: "Qual foi a principal motivação para as navegações portuguesas?", opcoes: ["Explorar novas terras", "Buscar ouro", "Expandir o cristianismo", "Todas as alternativas"], respostaCorreta: 3 },
+            { pergunta: "Quem proclamou a independência do Brasil?", opcoes: ["Dom Pedro I", "Dom Pedro II", "Tiradentes", "Getúlio Vargas"], respostaCorreta: 0 },
+            { pergunta: "Qual civilização antiga construiu as pirâmides?", opcoes: ["Grega", "Romana", "Egípcia", "Persa"], respostaCorreta: 2 },
+            { pergunta: "Quem foi o imperador romano durante o nascimento de Cristo?", opcoes: ["Nero", "César Augusto", "Constantino", "Marco Aurélio"], respostaCorreta: 1 },
+            { pergunta: "O que representava a Revolução Industrial?", opcoes: ["Avanço na agricultura", "Avanço tecnológico", "Colonização da América", "Fim da Idade Média"], respostaCorreta: 1 },
+            { pergunta: "Quem liderou a resistência contra os franceses em 1808 no Brasil?", opcoes: ["Dom Pedro I", "Dom João VI", "Napoleão Bonaparte", "José Bonifácio"], respostaCorreta: 1 },
+            { pergunta: "Qual foi o principal motivo da Primeira Guerra Mundial?", opcoes: ["Rivalidade econômica", "Colonialismo", "Nacionalismo e alianças militares", "Nenhum dos anteriores"], respostaCorreta: 2 },
+
+            // Perguntas de Língua Portuguesa
+            { pergunta: "Qual é o sujeito na frase: 'O gato dorme no sofá.'?", opcoes: ["O gato", "dorme", "no sofá", "sofá"], respostaCorreta: 0 },
+            { pergunta: "Qual o tempo verbal de 'Eu corri ontem'?", opcoes: ["Pretérito perfeito", "Pretérito imperfeito", "Presente", "Futuro do presente"], respostaCorreta: 0 },
+            { pergunta: "Qual palavra completa: 'O cachorro _____ (comer) a ração.'", opcoes: ["comeu", "come", "comeu", "comia"], respostaCorreta: 1 },
+            { pergunta: "Na palavra 'felizmente', 'mente' é um:", opcoes: ["Sufixo", "Prefixo", "Radical", "Pronome"], respostaCorreta: 0 },
+            { pergunta: "Qual figura de linguagem é usada em 'Ela é uma flor'?", opcoes: ["Comparação", "Metáfora", "Metonímia", "Antítese"], respostaCorreta: 1 },
+            { pergunta: "Qual a função do adjetivo na frase: 'A casa é grande.'?", opcoes: ["Modificar o substantivo", "Indicar ação", "Expressar sentimento", "Conectar palavras"], respostaCorreta: 0 },
+            { pergunta: "Qual pronome correto para completar: 'A casa é _____.'", opcoes: ["meu", "minha", "nosso", "teu"], respostaCorreta: 1 },
+            { pergunta: "Qual a classificação de 'bondade'?", opcoes: ["Substantivo", "Verbo", "Adjetivo", "Advérbio"], respostaCorreta: 0 },
+            { pergunta: "O que é um ditongo?", opcoes: ["Junção de vogais", "Palavra derivada", "Separação de sílabas", "Encontro de consoantes"], respostaCorreta: 0 },
+            { pergunta: "Qual o sinônimo de 'rápido'?", opcoes: ["Lento", "Devagar", "Veloz", "Lerdo"], respostaCorreta: 2 }
+        ];
+
+        let indicePergunta = 0;
+        let pontuacao = 0;
+
+        function carregarPergunta() {
+            const perguntaAtual = perguntas[indicePergunta];
+            document.getElementById("question").innerText = perguntaAtual.pergunta;
+            document.getElementById("option0").innerText = perguntaAtual.opcoes[0];
+            document.getElementById("option1").innerText = perguntaAtual.opcoes[1];
+            document.getElementById("option2").innerText = perguntaAtual.opcoes[2];
+            document.getElementById("option3").innerText = perguntaAtual.opcoes[3];
+            document.getElementById("result").innerText = "";
+        }
+
+        function checkAnswer(opcaoSelecionada) {
+            const perguntaAtual = perguntas[indicePergunta];
+            if (opcaoSelecionada === perguntaAtual.respostaCorreta) {
+                pontuacao++;
+                document.getElementById("result").innerText = "Correto!";
+            } else {
+                document.getElementById("result").innerText = "Errado! A resposta correta é: " + perguntaAtual.opcoes[perguntaAtual.respostaCorreta];
+            }
+            document.querySelectorAll(".option").forEach(option => option.onclick = null);
+        }
+
+        function nextQuestion() {
+            indicePergunta++;
+            if (indicePergunta < perguntas.length) {
+                carregarPergunta();
+                document.querySelectorAll(".option").forEach((option, index) => {
+                    option.onclick = () => checkAnswer(index);
+                });
+            } else {
+                document.getElementById("question").innerText = "Jogo concluído!";
+                document.querySelector(".options").style.display = "none";
+                document.querySelector(".btn").style.display = "none";
+                document.getElementById("result").innerText = "Você acertou " + pontuacao + " de " + perguntas.length + " perguntas.";
+            }
+        }
+
+        carregarPergunta();
+    </script>
+</body>
+</html>
